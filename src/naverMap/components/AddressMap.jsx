@@ -5,9 +5,11 @@ const AddressMap = () => {
   //const [map, setMap] = useState(null);
   //const [infoWindowRef.current, setInfoWindowRef] = useState(null);
   const [address, setAddress] = useState("");
+  const [cost, setCost] = useState("");
+
   const mapRef = useRef(null);
   const infoWindowRef = useRef(null);
-  const markerListRef = useRef(null);
+  //const markerListRef = useRef(null);
 
   const naver = window.naver;
 
@@ -159,6 +161,7 @@ const AddressMap = () => {
                 "http://localhost:8080/a?startX=126.73706789999993&startY=37.54487940000018&goalX=126.79758700000022&goalY=37.546016099999925&startTime=2023-09-18T18:00:00&endTime=2023-09-18T19:00:00"
               )
               .then((response) => {
+                setCost(response.data);
                 console.log(response.data); // 데이터 처리
               })
               .catch((error) => {
@@ -328,12 +331,11 @@ const AddressMap = () => {
       />
       <button onClick={handleSearch}>Search</button>
       <div style={{ width: "100%", height: "100px" }}>hi</div>
-      {/* //{naver.maps.Event.addListener(mapRef.current, "click", function (e) {
-        //var marker = new naver.maps.Marker({
-        //position: e.coord,
-        //map: null,
-        //});
-      //})} */}
+      <div>
+        <h1>서버로부터 받은 데이터</h1>
+
+        <pre>{JSON.stringify(cost, null, 2)}</pre>
+      </div>
     </div>
   );
 };

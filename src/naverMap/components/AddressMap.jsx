@@ -2,45 +2,51 @@ import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
 
 const AddressMap = () => {
-  //const [map, setMap] = useState(null);
-  //const [infoWindowRef.current, setInfoWindowRef] = useState(null);
   const [address, setAddress] = useState("");
-  const [cost, setCost] = useState("");
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("09:30");
+  const [costServerData, setCostServerData] = useState("");
+  const [recommand, setRecommand] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+
+  const [opportunityCost, setOpportunityCost] = useState("14000");
+  const [subwayCost, setSubwayCost] = useState("10000");
+  const [busCost, setBusCost] = useState("14000");
+  const [walkingCost, setWalkingCost] = useState("20000");
+
+  const [showResult, setShowResult] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const mapRef = useRef(null);
-  const infoWindowRef = useRef(null);
-  //const markerListRef = useRef(null);
+  const contextMenuWindowRef = useRef(null);
+
+  const startMarkerRef = useRef(null);
+  const endMarkerRef = useRef(null);
 
   const naver = window.naver;
+  //const navermaps = window.naver.maps;
 
+  //네이버지도 초기화
   useEffect(() => {
-    const navermaps = window.naver.maps;
-
     // 지도 초기화
     const initMap = () => {
       const mapOptions = {
-        center: new navermaps.LatLng(37.3595316, 127.1052133),
+        center: new naver.maps.LatLng(37.3595316, 127.1052133),
         zoom: 15,
         mapTypeControl: true,
       };
 
-      mapRef.current = new navermaps.Map("map", mapOptions);
+      mapRef.current = new naver.maps.Map("map", mapOptions);
       //setMap(map);
 
-      infoWindowRef.current = new navermaps.InfoWindow({
+      contextMenuWindowRef.current = new naver.maps.InfoWindow({
         disableAnchor: true,
         pixelOffset: new naver.maps.Point(+61, 0),
         //anchorColor: "#ff0",
       });
-      //setInfoWindowRef(infoWindowRef.current);
 
       mapRef.current.setCursor("pointer");
 
-      mapRef.current.addListener("rightclick", function (e) {
-        //console.log(infoWindowRef.current);
-        console.log(e.coord);
-        searchCoordinateToAddress(e.coord);
-      });
       //
       //   naver.maps.Event.addListener(mapRef.current, "click", function (e) {
       //     const marker = new naver.maps.Marker({
@@ -54,30 +60,45 @@ const AddressMap = () => {
 
     // 클린업 함수: 컴포넌트 언마운트 시 리소스 정리
     return () => {
-      if (infoWindowRef.current) {
-        infoWindowRef.current.close();
+      if (contextMenuWindowRef.current) {
+        contextMenuWindowRef.current.close();
       }
 
       // 모든 이벤트 리스너를 제거합니다.
-      navermaps.Event.clearListeners(mapRef.current, "click");
+      //naver.maps.Event.clearListeners(mapRef.current, "click");
       // 추가적으로 설정된 리스너가 있다면, 여기에서 clearListeners를 호출합니다.
     };
   }, []);
 
+  //지도 클릭 리스너추가
+  useEffect(() => {
+    naver.maps.Event.addListener(mapRef.current, "rightclick", function (e) {
+      console.log("rightClick");
+      searchCoordinateToAddress(e.coord);
+    });
+
+    return () => {
+      if (contextMenuWindowRef.current) {
+        contextMenuWindowRef.current.close();
+      }
+
+      // 모든 이벤트 리스너를 제거합니다.
+      naver.maps.Event.clearInstanceListeners(mapRef.current);
+      // 추가적으로 설정된 리스너가 있다면, 여기에서 clearListeners를 호출합니다.
+    };
+  }, [startTime, endTime, opportunityCost, subwayCost, busCost, walkingCost]);
+
   // 나머지 함수들(searchCoordinateToAddress, searchAddressToCoordinate 등)은 여기에 정의...
   const handleAddressChange = (e) => {
-    console.log(infoWindowRef.current);
     setAddress(e.target.value);
   };
 
   const handleSearch = (e) => {
-    console.log(infoWindowRef.current);
     e.preventDefault();
     searchAddressToCoordinate(address);
   };
 
   const handleKeyPress = (e) => {
-    console.log(infoWindowRef.current);
     if (e.key === "Enter") {
       searchAddressToCoordinate(address);
     }
@@ -85,7 +106,7 @@ const AddressMap = () => {
 
   //중요함수 가져오기
   function searchCoordinateToAddress(latlng) {
-    infoWindowRef.current.close();
+    //infoWindowRef.current.close();
 
     naver.maps.Service.reverseGeocode(
       {
@@ -112,7 +133,7 @@ const AddressMap = () => {
           htmlAddresses.push(i + 1 + ". " + addrType + " " + address);
         }
 
-        infoWindowRef.current.setContent(
+        contextMenuWindowRef.current.setContent(
           [
             '<div style="padding:10px;min-width:100px;line-height:150%;">',
             // '<h4 style="margin-top:5px;">검색 좌표</h4><br />',
@@ -123,7 +144,7 @@ const AddressMap = () => {
           ].join("\n")
         );
 
-        infoWindowRef.current.open(mapRef.current, latlng);
+        contextMenuWindowRef.current.open(mapRef.current, latlng);
 
         //버튼에 이벤트 리스너를 등록합니다.
 
@@ -132,41 +153,43 @@ const AddressMap = () => {
 
         if (startButton) {
           startButton.addEventListener("click", () => {
-            console.log(startButton);
-            // 필요한 추가 작업을 여기에 구현하세요.
+            contextMenuWindowRef.current.close();
+
+            if (startMarkerRef.current != null) {
+              startMarkerRef.current.setMap(null);
+            }
+
             const marker = new naver.maps.Marker({
               position: latlng,
               map: mapRef.current,
               icon: "./출발test.png",
             });
-            infoWindowRef.current.close();
+
+            startMarkerRef.current = marker;
+
+            //서버에요청
+            requestMinCostRoute();
           });
         }
 
         if (endButton) {
           endButton.addEventListener("click", () => {
-            console.log(endButton);
-            // 필요한 추가 작업을 여기에 구현하세요.
+            contextMenuWindowRef.current.close();
+
+            if (endMarkerRef.current != null) {
+              endMarkerRef.current.setMap(null);
+            }
+
             const marker = new naver.maps.Marker({
               position: latlng,
               map: mapRef.current,
               icon: "./도착test.png",
             });
-            infoWindowRef.current.close();
-            alert(latlng);
+
+            endMarkerRef.current = marker;
 
             //서버에요청
-            axios
-              .get(
-                "http://localhost:8080/a?startX=126.73706789999993&startY=37.54487940000018&goalX=126.79758700000022&goalY=37.546016099999925&startTime=2023-09-18T18:00:00&endTime=2023-09-18T19:00:00"
-              )
-              .then((response) => {
-                setCost(response.data);
-                console.log(response.data); // 데이터 처리
-              })
-              .catch((error) => {
-                console.error("Error:", error); // 오류 처리
-              });
+            requestMinCostRoute();
           });
         }
       }
@@ -203,7 +226,7 @@ const AddressMap = () => {
           htmlAddresses.push("[영문명 주소] " + item.englishAddress);
         }
 
-        infoWindowRef.current.setContent(
+        contextMenuWindowRef.current.setContent(
           [
             '<div style="padding:10px;min-width:200px;line-height:150%;">',
             '<h4 style="margin-top:5px;">검색 주소 : ' +
@@ -215,7 +238,7 @@ const AddressMap = () => {
         );
 
         mapRef.current.setCenter(point);
-        infoWindowRef.current.open(mapRef.current, point);
+        contextMenuWindowRef.current.open(mapRef.current, point);
       }
     );
   }
@@ -300,8 +323,96 @@ const AddressMap = () => {
   }
 
   //내가 추가한 함수들
+  const requestMinCostRoute = () => {
+    if (startMarkerRef.current != null && endMarkerRef.current != null) {
+      setShowResult(true);
+      setIsLoading(true);
+
+      axios
+        .get(
+          `http://localhost:8080/a?` +
+            `startX=${startMarkerRef.current.getPosition().lng()}&` +
+            `startY=${startMarkerRef.current.getPosition().lat()}&` +
+            `goalX=${endMarkerRef.current.getPosition().lng()}&` +
+            `goalY=${endMarkerRef.current.getPosition().lat()}&` +
+            `startTime=2024-02-05T${startTime}&` +
+            `endTime=2024-02-05T${endTime}&` +
+            `opportunityCost=${opportunityCost}&` +
+            `subwayCost=${subwayCost}&` +
+            `busCost=${busCost}&` +
+            `walkingCost=${walkingCost}`
+        )
+        .then((response) => {
+          setCostServerData(response.data);
+          makeRecommand(response.data);
+          console.log(response.data); // 데이터 처리
+
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert.error("Error:", error); // 오류 처리
+        });
+    }
+  };
+
+  const makeRecommand = (data) => {
+    var path = data.pathAndCosts[data.minCostIndex].path;
+
+    var makedData = `추천시간
+      출발시간: ${path.departureTime}
+      도착시간: ${path.arrivalTime}
+      요약: `;
+
+    //경로
+    path.legs[0].steps.forEach((step) => {
+      if (step.type === "WALKING") {
+        //var ways = step.walkpath.summary.ways;
+        //makedData += ways[ways.length - 1];
+        makedData += `- 걷기(${step.duration}분)`;
+      } else {
+        var stations = step.stations;
+        makedData += ` - ${step.type}(${step.duration}분, ${
+          stations[0].name
+        } ~ ${stations[stations.length - 1].name})`;
+
+        // makedData += ` - ${stations[0].name}에서 탑승 ${
+        //   stations[stations.length - 1].name
+        // }에서 하차/`;
+      }
+    });
+
+    setRecommand(makedData);
+  };
+
+  const handleStartTimeChange = (e) => {
+    setStartTime(e.target.value);
+  };
+
+  const handleEndTimeChange = (e) => {
+    setEndTime(e.target.value);
+  };
+
+  // 상세 설정 표시 상태를 토글하는 함수
+  const toggleShowDetails = () => {
+    setShowDetails(!showDetails);
+  };
+
+  const handleOpportunityCostChange = (e) => {
+    setOpportunityCost(e.target.value);
+  };
+  const handleSubwayCostChange = (e) => {
+    setSubwayCost(e.target.value);
+  };
+  const handleBusCostChange = (e) => {
+    setBusCost(e.target.value);
+  };
+  const handleWalkingCostChange = (e) => {
+    setWalkingCost(e.target.value);
+  };
+
   const handleAddressChange2 = (e) => {
-    console.log(infoWindowRef.current);
+    console.log(contextMenuWindowRef.current);
     setAddress(e.target.value);
   };
 
@@ -314,7 +425,7 @@ const AddressMap = () => {
 
   return (
     <div>
-      <div id="map" style={{ width: "100%", height: "800px" }}></div>
+      <div id="map" style={{ width: "100%", height: "700px" }}></div>
       <input
         style={{
           padding: "10px 20px", // 안쪽 여백
@@ -329,12 +440,133 @@ const AddressMap = () => {
         onChange={handleAddressChange}
         onKeyPress={handleKeyPress}
       />
-      <button onClick={handleSearch}>Search</button>
-      <div style={{ width: "100%", height: "100px" }}>hi</div>
-      <div>
-        <h1>서버로부터 받은 데이터</h1>
 
-        <pre>{JSON.stringify(cost, null, 2)}</pre>
+      {/* 시간 범위 컨테이너 */}
+      <div
+        style={{
+          display: "flex", // flexbox를 사용하여 아이템을 수평 정렬
+          alignItems: "center", // 아이템을 세로 방향으로 가운데 정렬
+          padding: "10px", // 컨테이너의 안쪽 여백
+          zIndex: 10, // 쌓임 순서
+          position: "absolute", // 절대 위치
+          top: "710px", // 상단에서 10px 떨어진 위치
+          left: "10px", // 왼쪽에서 10px 떨어진 위치
+        }}
+      >
+        {/* 시간 범위 텍스트 */}
+        <h1 style={{ margin: "0 10px 0 0" }}>시간 범위 입력:</h1>
+
+        <input
+          style={{
+            padding: "10px 20px", // 안쪽 여백
+            borderRadius: "4px", // 모서리 둥글기
+            zIndex: 10, // 쌓임 순서
+          }}
+          type="text"
+          value={startTime}
+          onChange={handleStartTimeChange}
+        />
+
+        <span>~</span>
+
+        <input
+          style={{
+            padding: "10px 20px", // 안쪽 여백
+            borderRadius: "4px", // 모서리 둥글기
+            zIndex: 10, // 쌓임 순서
+          }}
+          type="text"
+          value={endTime}
+          onChange={handleEndTimeChange}
+        />
+
+        {/* 상세 설정 버튼 */}
+        <button
+          style={{
+            padding: "10px 20px",
+            margin: "10px",
+            borderRadius: "4px",
+            zIndex: 10,
+          }}
+          onClick={toggleShowDetails}
+        >
+          상세 설정
+        </button>
+      </div>
+
+      <div
+        style={{
+          position: "absolute", // 절대 위치
+          top: "800px", // "시간 범위" 컨테이너 아래 위치
+          left: "10px", // 왼쪽에서 10px 떨어진 위치
+          width: "100%", // 전체 너비
+          padding: "10px", // 안쪽 여백
+          zIndex: 10, // 쌓임 순서
+        }}
+      >
+        {/* 상세 설정 입력 필드 */}
+        {showDetails && (
+          <div
+            style={{
+              padding: "10px",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              backgroundColor: "#f9f9f9",
+              zIndex: 10,
+            }}
+          >
+            <h2>대중교통 별 시간당 비용 입력</h2>
+            <div>
+              <label>기회 비용(시급): </label>
+              <input
+                type="number"
+                placeholder="기회 비용(시급) 입력"
+                value={opportunityCost}
+                onChange={handleOpportunityCostChange}
+              />
+            </div>
+            <div>
+              <label>버스 비용: </label>
+              <input
+                type="number"
+                placeholder="버스 비용 입력"
+                value={busCost}
+                onChange={handleBusCostChange}
+              />
+            </div>
+            <div>
+              <label>지하철 비용: </label>
+              <input
+                type="number"
+                placeholder="지하철 비용 입력"
+                value={subwayCost}
+                onChange={handleSubwayCostChange}
+              />
+            </div>
+            <div>
+              <label>걷기 비용: </label>
+              <input
+                type="number"
+                placeholder="걷기 비용 입력"
+                value={walkingCost}
+                onChange={handleWalkingCostChange}
+              />
+            </div>
+            {/* 필요에 따라 추가 교통수단 입력 필드 추가 */}
+          </div>
+        )}
+        {showResult &&
+          (isLoading ? (
+            <h2> 계산중..... </h2>
+          ) : (
+            <div>
+              <h2>추천 시간 출력</h2>
+              <pre>{recommand}</pre>
+
+              <h1>서버로부터 받은 데이터</h1>
+              <pre>{JSON.stringify(costServerData, null, 2)}</pre>
+            </div>
+          ))}
       </div>
     </div>
   );

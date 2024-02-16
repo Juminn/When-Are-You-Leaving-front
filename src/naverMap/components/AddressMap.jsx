@@ -72,10 +72,14 @@ const AddressMap = () => {
 
   //지도 클릭 리스너추가
   useEffect(() => {
-    naver.maps.Event.addListener(mapRef.current, "rightclick", function (e) {
-      console.log("rightClick");
-      searchCoordinateToAddress(e.coord);
-    });
+    const rightClick = naver.maps.Event.addListener(
+      mapRef.current,
+      "rightclick",
+      function (e) {
+        console.log("rightClick");
+        searchCoordinateToAddress(e.coord);
+      }
+    );
 
     return () => {
       if (contextMenuWindowRef.current) {
@@ -83,7 +87,8 @@ const AddressMap = () => {
       }
 
       // 모든 이벤트 리스너를 제거합니다.
-      naver.maps.Event.clearInstanceListeners(mapRef.current);
+      //naver.maps.Event.clearInstanceListeners(mapRef.current);
+      naver.maps.Event.removeListener(rightClick);
       // 추가적으로 설정된 리스너가 있다면, 여기에서 clearListeners를 호출합니다.
     };
   }, [startTime, endTime, opportunityCost, subwayCost, busCost, walkingCost]);

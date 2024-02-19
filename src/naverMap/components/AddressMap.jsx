@@ -335,7 +335,7 @@ const AddressMap = () => {
 
       axios
         .get(
-          `http://localhost:8080/a?` +
+          `http://when-to-go-bridgeWithALB-1720782157.ap-northeast-2.elb.amazonaws.com/a?` +
             `startX=${startMarkerRef.current.getPosition().lng()}&` +
             `startY=${startMarkerRef.current.getPosition().lat()}&` +
             `goalX=${endMarkerRef.current.getPosition().lng()}&` +

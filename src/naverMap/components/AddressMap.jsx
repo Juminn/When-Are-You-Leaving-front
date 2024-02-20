@@ -566,7 +566,7 @@ const AddressMap = () => {
           ) : (
             <div>
               <h2>추천 시간 출력</h2>
-              <pre>{recommand}</pre>
+              <pre style={{ fontSize: '20px' }}>{recommand}</pre>
 
               <h1>서버로부터 받은 데이터</h1>
               <pre>{JSON.stringify(costServerData, null, 2)}</pre>

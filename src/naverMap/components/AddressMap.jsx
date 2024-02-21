@@ -333,9 +333,11 @@ const AddressMap = () => {
       setShowResult(true);
       setIsLoading(true);
 
+      const apiUrl = process.env.REACT_APP_API_ENDPOINT;
+
       axios
         .get(
-          `https://api.언제출발해.com/a?` +
+          `${apiUrl}/a?` +
             `startX=${startMarkerRef.current.getPosition().lng()}&` +
             `startY=${startMarkerRef.current.getPosition().lat()}&` +
             `goalX=${endMarkerRef.current.getPosition().lng()}&` +
@@ -364,9 +366,13 @@ const AddressMap = () => {
   const makeRecommand = (data) => {
     var path = data.pathAndCosts[data.minCostIndex].path;
 
+    // 출발 시간 변환
+    const formattedDepartureTime = formatTime(path.departureTime);
+    const formattedArrivalTime = formatTime(path.arrivalTime);
+
     var makedData = `추천시간
-      출발시간: ${path.departureTime}
-      도착시간: ${path.arrivalTime}
+      출발시간: ${formattedDepartureTime}
+      도착시간: ${formattedArrivalTime}
       요약: `;
 
     //경로
@@ -377,9 +383,9 @@ const AddressMap = () => {
         makedData += `- 걷기(${step.duration}분)`;
       } else {
         var stations = step.stations;
-        makedData += ` - ${step.type}(${step.duration}분, ${
-          stations[0].name
-        } ~ ${stations[stations.length - 1].name})`;
+        makedData += ` - ${step.routes[0].name} ${step.type}(${
+          step.duration
+        }분, ${stations[0].name} ~ ${stations[stations.length - 1].name})`;
 
         // makedData += ` - ${stations[0].name}에서 탑승 ${
         //   stations[stations.length - 1].name
@@ -415,6 +421,15 @@ const AddressMap = () => {
   const handleWalkingCostChange = (e) => {
     setWalkingCost(e.target.value);
   };
+
+  //
+  function formatTime(isoString) {
+    const date = new Date(isoString);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const seconds = date.getSeconds().toString().padStart(2, "0");
+    return `${hours}시 ${minutes}분 ${seconds}초`;
+  }
 
   const handleAddressChange2 = (e) => {
     console.log(contextMenuWindowRef.current);
@@ -566,7 +581,7 @@ const AddressMap = () => {
           ) : (
             <div>
               <h2>추천 시간 출력</h2>
-              <pre style={{ fontSize: '20px' }}>{recommand}</pre>
+              <pre style={{ fontSize: "20px" }}>{recommand}</pre>
 
               <h1>서버로부터 받은 데이터</h1>
               <pre>{JSON.stringify(costServerData, null, 2)}</pre>

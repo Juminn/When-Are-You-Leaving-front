@@ -155,7 +155,7 @@ const AddressMap = () => {
     }
   }
 
-  //주소로 좌표찾고 이동
+  //주소로 좌표찾고 이동 후 버튼표시
   function searchAddressToCoordinate(address) {
     naver.maps.Service.geocode(
       {
@@ -173,39 +173,13 @@ const AddressMap = () => {
           );
         }
 
-        var htmlAddresses = [],
-          item = response.v2.addresses[0],
-          point = new naver.maps.LatLng(item.y, item.x);
+        const address = response.v2.addresses[0];
+        const point = new naver.maps.LatLng(address.y, address.x);
 
-        if (item.roadAddress) {
-          htmlAddresses.push("[도로명 주소] " + item.roadAddress);
-        }
-
-        if (item.jibunAddress) {
-          htmlAddresses.push("[지번 주소] " + item.jibunAddress);
-        }
-
-        if (item.englishAddress) {
-          htmlAddresses.push("[영문명 주소] " + item.englishAddress);
-        }
-
-        contextMenuWindowRef.current.setContent(
-          [
-            '<div style="padding:10px;min-width:200px;line-height:150%;">',
-            '<h4 style="margin-top:5px;">검색 주소 : ' +
-              address +
-              "</h4><br />",
-            htmlAddresses.join("<br />"),
-            "</div>",
-          ].join("\n")
-        );
-
-        console.log("searchAddressToCoordinate, response: ", response);
         console.log("searchAddressToCoordinate, point: ", point);
 
         mapRef.current.setCenter(point);
         searchCoordinateToAddress(point);
-        //contextMenuWindowRef.current.open(mapRef.current, point);
       }
     );
   }

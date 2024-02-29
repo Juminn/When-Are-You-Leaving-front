@@ -1,5 +1,21 @@
 import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
+import AddressInput from "./AddressInput";
+import TimeRangeInput from "./TimeRangeInput";
+import DetailSettings from "./DetailSettings";
+import styled from "styled-components";
+
+const MapPageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  position: relative;
+  top: 10px;
+  left: 10px;
+  gap: 20px;
+  z-index: +2;
+`;
 
 const AddressMap = () => {
   const [address, setAddress] = useState("");
@@ -9,10 +25,12 @@ const AddressMap = () => {
   const [recommand, setRecommand] = useState("");
   const [showDetails, setShowDetails] = useState(false);
 
-  const [opportunityCost, setOpportunityCost] = useState("14000");
-  const [subwayCost, setSubwayCost] = useState("10000");
-  const [busCost, setBusCost] = useState("14000");
-  const [walkingCost, setWalkingCost] = useState("20000");
+  const [settings, setSettings] = useState({
+    opportunityCost: "14000",
+    subwayCost: "10000",
+    busCost: "14000",
+    walkingCost: "20000",
+  });
 
   const [showResult, setShowResult] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,17 +101,7 @@ const AddressMap = () => {
       // 우클릭 이벤트 리스너를 제거합니다.
       naver.maps.Event.removeListener(rightClick);
     };
-  }, [startTime, endTime, opportunityCost, subwayCost, busCost, walkingCost]);
-
-  //핸들러
-  const handleAddressChange = (e) => {
-    setAddress(e.target.value);
-  };
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      searchAddressToCoordinate(address);
-    }
-  };
+  }, [startTime, endTime, settings]);
 
   //우클릭 메뉴만들기 - 함수 내부를 쪼개는게 좋을듯
   function searchCoordinateToAddress(latlng) {
@@ -157,6 +165,8 @@ const AddressMap = () => {
 
   //주소로 좌표찾고 이동 후 버튼표시
   function searchAddressToCoordinate(address) {
+    const naver = window.naver;
+
     naver.maps.Service.geocode(
       {
         query: address,
@@ -186,41 +196,49 @@ const AddressMap = () => {
 
   //최소비용 경로와 시간 요청
   const requestMinCostRoute = () => {
-    if (startMarkerRef.current != null && endMarkerRef.current != null) {
-      setShowResult(true);
-      setIsLoading(true);
-
-      const apiUrl = process.env.REACT_APP_API_ENDPOINT;
-
-      axios
-        .get(
-          `${apiUrl}/a?` +
-            `startX=${startMarkerRef.current.getPosition().lng()}&` +
-            `startY=${startMarkerRef.current.getPosition().lat()}&` +
-            `goalX=${endMarkerRef.current.getPosition().lng()}&` +
-            `goalY=${endMarkerRef.current.getPosition().lat()}&` +
-            `startTime=2024-02-05T${startTime}&` +
-            `endTime=2024-02-05T${endTime}&` +
-            `opportunityCost=${opportunityCost}&` +
-            `subwayCost=${subwayCost}&` +
-            `busCost=${busCost}&` +
-            `walkingCost=${walkingCost}`
-        )
-        .then((response) => {
-          setCostServerData(response.data);
-          makeRecommand(response.data);
-          console.log(response.data); // 데이터 처리
-
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          alert(
-            "서버가 불안정합니다. 새로고침 후 다시 시도 해주세요. Error:" +
-              error.message
-          ); // 오류 처리
-        });
+    //전처리
+    if (startMarkerRef.current == null || endMarkerRef.current == null) {
+      return;
     }
+    if (startTime > endTime) {
+      alert("종료시간이 시작시간보다 빠를 수 없습니다. ");
+      return;
+    }
+
+    //로직시작
+    setShowResult(true);
+    setIsLoading(true);
+
+    const apiUrl = process.env.REACT_APP_API_ENDPOINT;
+
+    axios
+      .get(
+        `${apiUrl}/a?` +
+          `startX=${startMarkerRef.current.getPosition().lng()}&` +
+          `startY=${startMarkerRef.current.getPosition().lat()}&` +
+          `goalX=${endMarkerRef.current.getPosition().lng()}&` +
+          `goalY=${endMarkerRef.current.getPosition().lat()}&` +
+          `startTime=2024-02-05T${startTime}&` +
+          `endTime=2024-02-05T${endTime}&` +
+          `opportunityCost=${settings.opportunityCost}&` +
+          `subwayCost=${settings.subwayCost}&` +
+          `busCost=${settings.busCost}&` +
+          `walkingCost=${settings.walkingCost}`
+      )
+      .then((response) => {
+        setCostServerData(response.data);
+        makeRecommand(response.data);
+        console.log(response.data); // 데이터 처리
+
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert(
+          "서버 요청에 실패했습니다. 새로고침 후 다시 시도해주세요. Error:" +
+            error.message
+        ); // 오류 처리
+      });
   };
 
   const makeRecommand = (data) => {
@@ -256,33 +274,6 @@ const AddressMap = () => {
     setRecommand(makedData);
   };
 
-  const handleStartTimeChange = (e) => {
-    setStartTime(e.target.value);
-  };
-
-  const handleEndTimeChange = (e) => {
-    setEndTime(e.target.value);
-  };
-
-  // 상세 설정 표시 상태를 토글하는 함수
-  const toggleShowDetails = () => {
-    setShowDetails(!showDetails);
-  };
-
-  const handleOpportunityCostChange = (e) => {
-    setOpportunityCost(e.target.value);
-  };
-  const handleSubwayCostChange = (e) => {
-    setSubwayCost(e.target.value);
-  };
-  const handleBusCostChange = (e) => {
-    setBusCost(e.target.value);
-  };
-  const handleWalkingCostChange = (e) => {
-    setWalkingCost(e.target.value);
-  };
-
-  //
   function formatTime(isoString) {
     const date = new Date(isoString);
     const hours = date.getHours().toString().padStart(2, "0");
@@ -294,135 +285,28 @@ const AddressMap = () => {
   return (
     <div>
       <div id="map" style={{ width: "100%", height: "700px" }}></div>
-      <input
-        style={{
-          padding: "10px 20px", // 안쪽 여백
-          borderRadius: "4px", // 모서리 둥글기
-          position: "absolute", // 절대 위치
-          top: "10px", // 상단에서 10px 떨어진 위치
-          left: "10px", // 왼쪽에서 10px 떨어진 위치
-          zIndex: 10, // 쌓임 순서
-        }}
-        type="text"
-        value={address}
-        onChange={handleAddressChange}
-        onKeyPress={handleKeyPress}
+      <AddressInput
+        address={address}
+        setAddress={setAddress}
+        onSearch={searchAddressToCoordinate}
       />
 
-      {/* 시간 범위 컨테이너 */}
-      <div
-        style={{
-          display: "flex", // flexbox를 사용하여 아이템을 수평 정렬
-          alignItems: "center", // 아이템을 세로 방향으로 가운데 정렬
-          padding: "10px", // 컨테이너의 안쪽 여백
-          zIndex: 10, // 쌓임 순서
-          position: "absolute", // 절대 위치
-          top: "710px", // 상단에서 10px 떨어진 위치
-          left: "10px", // 왼쪽에서 10px 떨어진 위치
-        }}
-      >
-        {/* 시간 범위 텍스트 */}
-        <h1 style={{ margin: "0 10px 0 0" }}>시간 범위 입력:</h1>
-
-        <input
-          style={{
-            padding: "10px 20px", // 안쪽 여백
-            borderRadius: "4px", // 모서리 둥글기
-            zIndex: 10, // 쌓임 순서
-          }}
-          type="text"
-          value={startTime}
-          onChange={handleStartTimeChange}
+      <MapPageContainer>
+        <TimeRangeInput
+          startTime={startTime}
+          setStartTime={setStartTime}
+          endTime={endTime}
+          setEndTime={setEndTime}
+          showDetails={showDetails}
+          setShowDetails={setShowDetails}
         />
 
-        <span>~</span>
-
-        <input
-          style={{
-            padding: "10px 20px", // 안쪽 여백
-            borderRadius: "4px", // 모서리 둥글기
-            zIndex: 10, // 쌓임 순서
-          }}
-          type="text"
-          value={endTime}
-          onChange={handleEndTimeChange}
+        <DetailSettings
+          show={showDetails ? "true" : undefined}
+          settings={settings}
+          setSettings={setSettings}
         />
 
-        {/* 상세 설정 버튼 */}
-        <button
-          style={{
-            padding: "10px 20px",
-            margin: "10px",
-            borderRadius: "4px",
-            zIndex: 10,
-          }}
-          onClick={toggleShowDetails}
-        >
-          상세 설정
-        </button>
-      </div>
-
-      <div
-        style={{
-          position: "absolute", // 절대 위치
-          top: "800px", // "시간 범위" 컨테이너 아래 위치
-          left: "10px", // 왼쪽에서 10px 떨어진 위치
-          width: "100%", // 전체 너비
-          padding: "10px", // 안쪽 여백
-          zIndex: 10, // 쌓임 순서
-        }}
-      >
-        {/* 상세 설정 입력 필드 */}
-        {showDetails && (
-          <div
-            style={{
-              padding: "10px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              backgroundColor: "#f9f9f9",
-              zIndex: 10,
-            }}
-          >
-            <h2>대중교통 별 시간당 비용 입력</h2>
-            <div>
-              <label>기회 비용(시급): </label>
-              <input
-                type="number"
-                placeholder="기회 비용(시급) 입력"
-                value={opportunityCost}
-                onChange={handleOpportunityCostChange}
-              />
-            </div>
-            <div>
-              <label>버스 비용: </label>
-              <input
-                type="number"
-                placeholder="버스 비용 입력"
-                value={busCost}
-                onChange={handleBusCostChange}
-              />
-            </div>
-            <div>
-              <label>지하철 비용: </label>
-              <input
-                type="number"
-                placeholder="지하철 비용 입력"
-                value={subwayCost}
-                onChange={handleSubwayCostChange}
-              />
-            </div>
-            <div>
-              <label>걷기 비용: </label>
-              <input
-                type="number"
-                placeholder="걷기 비용 입력"
-                value={walkingCost}
-                onChange={handleWalkingCostChange}
-              />
-            </div>
-            {/* 필요에 따라 추가 교통수단 입력 필드 추가 */}
-          </div>
-        )}
         {showResult &&
           (isLoading ? (
             <h2> 계산중..... </h2>
@@ -435,7 +319,8 @@ const AddressMap = () => {
               <pre>{JSON.stringify(costServerData, null, 2)}</pre>
             </div>
           ))}
-      </div>
+        {/* </div> */}
+      </MapPageContainer>
     </div>
   );
 };

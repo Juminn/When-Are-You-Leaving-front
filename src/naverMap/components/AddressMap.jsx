@@ -1,9 +1,13 @@
 import axios from "axios";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import AddressInput from "./AddressInput";
 import TimeRangeInput from "./TimeRangeInput";
 import DetailSettings from "./DetailSettings";
+
 import styled from "styled-components";
+
+import formatTime from "../util/Utility";
+import { useMap } from "../hooks/useMap";
 
 const MapPageContainer = styled.div`
   display: flex;
@@ -35,73 +39,15 @@ const AddressMap = () => {
   const [showResult, setShowResult] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const mapRef = useRef(null);
-  const contextMenuWindowRef = useRef(null);
-
-  const startMarkerRef = useRef(null);
-  const endMarkerRef = useRef(null);
-
   const naver = window.naver;
 
-  //네이버지도 초기화
-  useEffect(() => {
-    // 지도 초기화
-    const initMap = () => {
-      const mapOptions = {
-        center: new naver.maps.LatLng(37.3595316, 127.1052133),
-        zoom: 15,
-        mapTypeControl: true,
-      };
-
-      mapRef.current = new naver.maps.Map("map", mapOptions);
-
-      contextMenuWindowRef.current = new naver.maps.InfoWindow({
-        disableAnchor: true,
-        pixelOffset: new naver.maps.Point(+61, 0),
-      });
-
-      mapRef.current.setCursor("pointer");
-    };
-
-    initMap();
-
-    // 클린업 함수: 컴포넌트 언마운트 시 리소스 정리
-    return () => {
-      if (contextMenuWindowRef.current) {
-        mapRef.current.destroy();
-      }
-
-      if (startMarkerRef.current) {
-        startMarkerRef.current = null;
-      }
-
-      if (endMarkerRef.current) {
-        endMarkerRef.current = null;
-        //endMarkerRef.current.setMap(null);
-      }
-    };
-  }, []);
-
-  //지도 클릭 리스너추가
-  useEffect(() => {
-    const rightClick = naver.maps.Event.addListener(
-      mapRef.current,
-      "rightclick",
-      function (e) {
-        console.log("rightClick, 좌표: ", e.coord);
-        searchCoordinateToAddress(e.coord);
-      }
-    );
-
-    return () => {
-      if (contextMenuWindowRef.current) {
-        contextMenuWindowRef.current.close();
-      }
-
-      // 우클릭 이벤트 리스너를 제거합니다.
-      naver.maps.Event.removeListener(rightClick);
-    };
-  }, [startTime, endTime, settings]);
+  //네이버지도 초기화, 지도 context menu추가
+  const { mapRef, startMarkerRef, endMarkerRef, contextMenuWindowRef } = useMap(
+    searchCoordinateToAddress,
+    startTime,
+    endTime,
+    settings
+  );
 
   //우클릭 메뉴만들기 - 함수 내부를 쪼개는게 좋을듯
   function searchCoordinateToAddress(latlng) {
@@ -209,6 +155,8 @@ const AddressMap = () => {
     setShowResult(true);
     setIsLoading(true);
 
+    //const response = minCostRouteRequestApi();
+
     const apiUrl = process.env.REACT_APP_API_ENDPOINT;
 
     axios
@@ -273,14 +221,6 @@ const AddressMap = () => {
 
     setRecommand(makedData);
   };
-
-  function formatTime(isoString) {
-    const date = new Date(isoString);
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const seconds = date.getSeconds().toString().padStart(2, "0");
-    return `${hours}시 ${minutes}분 ${seconds}초`;
-  }
 
   return (
     <div>

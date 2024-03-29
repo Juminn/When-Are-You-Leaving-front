@@ -1,4 +1,6 @@
-const minCostRouteRequestApi = (
+import axios from "axios";
+
+export const minCostRouteRequestApi = async (
   startX,
   startY,
   goalX,
@@ -12,25 +14,20 @@ const minCostRouteRequestApi = (
 ) => {
   const apiUrl = process.env.REACT_APP_API_ENDPOINT;
 
-  axios
+  const response = await axios
     .get(
       `${apiUrl}/a?` +
         `startX=${startX}&` +
         `startY=${startY}&` +
         `goalX=${goalX}&` +
         `goalY=${goalY}&` +
-        `startTime=2024-02-05T${startTime}&` +
-        `endTime=2024-02-05T${endTime}&` +
+        `startTime=${startTime}&` +
+        `endTime=${endTime}&` +
         `opportunityCost=${opportunityCost}&` +
         `subwayCost=${subwayCost}&` +
         `busCost=${busCost}&` +
         `walkingCost=${walkingCost}`
     )
-    .then((response) => {
-      // 데이터 처리
-      console.log("minCostRouteRequestApi Success, response: " + response.data);
-      return response;
-    })
     .catch((error) => {
       // 오류 처리
       console.error("minCostRouteRequestApi False:", error);
@@ -40,4 +37,6 @@ const minCostRouteRequestApi = (
       );
       return;
     });
+
+  return response.data;
 };

@@ -59,7 +59,7 @@ export const useMap = (
   useEffect(() => {
     const rightClick = naver.maps.Event.addListener(
       mapRef.current,
-      "rightclick",
+      "mousedown",
       function (e) {
         console.log("rightClick, 좌표: ", e.coord);
         searchCoordinateToAddress(e.coord);

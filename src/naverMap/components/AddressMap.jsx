@@ -8,6 +8,7 @@ import styled from "styled-components";
 
 import formatTime from "../util/Utility";
 import { useMap } from "../hooks/useMap";
+import { minCostRouteRequestApi } from "../services/CostCalApi";
 
 const MapPageContainer = styled.div`
   display: flex;
@@ -20,7 +21,7 @@ const MapPageContainer = styled.div`
   gap: 20px;
   z-index: +2;
 `;
-
+//
 const AddressMap = () => {
   const [address, setAddress] = useState("");
   const [startTime, setStartTime] = useState("09:00");
@@ -141,7 +142,7 @@ const AddressMap = () => {
   }
 
   //최소비용 경로와 시간 요청
-  const requestMinCostRoute = () => {
+  const requestMinCostRoute = async () => {
     //전처리
     if (startMarkerRef.current == null || endMarkerRef.current == null) {
       return;
@@ -151,12 +152,30 @@ const AddressMap = () => {
       return;
     }
 
-    //로직시작
+    //로직시작s
     setShowResult(true);
     setIsLoading(true);
 
-    //const response = minCostRouteRequestApi();
+    const response = await minCostRouteRequestApi(
+      startMarkerRef.current.getPosition().lng(),
+      startMarkerRef.current.getPosition().lat(),
+      endMarkerRef.current.getPosition().lng(),
+      endMarkerRef.current.getPosition().lat(),
+      "2024-02-05T" + startTime,
+      "2024-02-05T" + endTime,
+      settings.opportunityCost,
+      settings.subwayCost,
+      settings.busCost,
+      settings.walkingCost
+    );
 
+    console.log(response); // 데이터 처리
+    setCostServerData(response);
+    makeRecommand(response);
+
+    setIsLoading(false);
+
+    /*
     const apiUrl = process.env.REACT_APP_API_ENDPOINT;
 
     axios
@@ -187,6 +206,7 @@ const AddressMap = () => {
             error.message
         ); // 오류 처리
       });
+      */
   };
 
   const makeRecommand = (data) => {

@@ -10,10 +10,10 @@ const customStyles = {
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
-    zIndex: 100000,
-    overlay: {
-      zIndex: -1, // 모달 배경에 적용될 z-index 값
-    },
+    zIndex: 0,
+  },
+  overlay: {
+    zIndex: 1, // 모달 배경에 적용될 z-index 값
   },
 };
 

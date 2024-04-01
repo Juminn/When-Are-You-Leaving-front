@@ -6,7 +6,7 @@ const InputContainer = styled.div`
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 10;
+  z-index: 0;
 `;
 
 const AddressInputField = styled.input`

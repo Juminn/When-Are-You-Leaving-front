@@ -20,7 +20,7 @@ const MapPageContainer = styled.div`
   top: 10px;
   left: 10px;
   gap: 20px;
-  z-index: +2;
+  z-index: 0;
 `;
 //
 const AddressMap = () => {

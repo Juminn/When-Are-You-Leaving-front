@@ -9,6 +9,7 @@ import styled from "styled-components";
 import formatTime from "../util/Utility";
 import { useMap } from "../hooks/useMap";
 import { minCostRouteRequestApi } from "../services/CostCalApi";
+import CustomModal from "../CustomModal";
 
 const MapPageContainer = styled.div`
   display: flex;
@@ -251,6 +252,7 @@ const AddressMap = () => {
         onSearch={searchAddressToCoordinate}
       />
 
+      <CustomModal />
       <MapPageContainer>
         <TimeRangeInput
           startTime={startTime}
@@ -279,7 +281,6 @@ const AddressMap = () => {
               <pre>{JSON.stringify(costServerData, null, 2)}</pre>
             </div>
           ))}
-        {/* </div> */}
       </MapPageContainer>
     </div>
   );

@@ -245,7 +245,7 @@ const AddressMap = () => {
 
   return (
     <div>
-      <div id="map" style={{ width: "100%", height: "700px" }}></div>
+      <div id="map" style={{ width: "100vh", height: "80vh" }}></div>
       <AddressInput
         address={address}
         setAddress={setAddress}

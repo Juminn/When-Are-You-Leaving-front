@@ -1,71 +1,30 @@
-# Getting Started with Create React App
+출퇴근을 몇시에, 어느 루트로 가는게 가장 효율적일 지 추천해주는 사용자 맞춤형 길찾기 서비스
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```
+출도착지, 출근 가능한 시간범위, 대중교통별 기회비용을 입력하면 몇시에, 어느 루트로 가는게 가장 효율적일 지 추천해줍니다.
+1. 출도착지 설정법
+  지도의 검색창에서 도로명 주소 검색을 하거나, 지도에서 마우스 우클릭 후 출도착지를 설정한다.
 
-## Available Scripts
+2. 출근 가능한 시간범위 입력
+   시작시간과 종료시간을 입력한다.
 
-In the project directory, you can run:
+3. 대중교통별 기회비용 입력
+  상세설정 버튼을 눌러 각 대중교통별 기회비용을 입력한다.
+```
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+용어설명
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. 시작시간과 종료시간
+가능한 출근 시간범위를 뜻한다.
+Ex) 유연근무제로 인해 08~10시까지 출근시간이 선택가능한 회사원 A씨는 출근에 대략 30분의 시간이 걸린다.
+이때 회사원 A씨가 선택가능한 출발시간은 07:30 ~ 09:30 이다. 즉 시작시간: 07:30, 종료시간: 09:30을 입력해준다.
 
-### `npm test`
+2. 대중교통별 기회비용
+대중교통을 이용한다는 것은 시간적 비용이 발생한다. 또한 사람마다 걷기, 버스, 지하철, 환승에 대한 비용(선호도)가 다르다.
+여기서 비용은 만약에 1시간동안 버스, 지하철, 걷기를 안할 수 있다면 지불할 수 있는 금액을 입력하면 된다.
+Ex) A씨는 지하철을 가장 선호하며, 걷기보단 버스를 좋아한다.
+지하철 비용: 7000, 버스: 9000, 걷기: 11000
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# When-to-go-front

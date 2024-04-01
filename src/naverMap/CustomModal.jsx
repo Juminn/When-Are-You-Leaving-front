@@ -11,6 +11,8 @@ const customStyles = {
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
     zIndex: 0,
+    maxWidth: "80vh",
+    maxHeight: "40vh",
   },
   overlay: {
     zIndex: 1, // 모달 배경에 적용될 z-index 값

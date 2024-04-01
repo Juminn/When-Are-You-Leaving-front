@@ -59,12 +59,34 @@ export const useMap = (
   useEffect(() => {
     const rightClick = naver.maps.Event.addListener(
       mapRef.current,
-      "mousedown",
+      "rightclick",
       function (e) {
         console.log("rightClick, 좌표: ", e.coord);
         searchCoordinateToAddress(e.coord);
       }
     );
+
+    let longPressTimer;
+
+    const handleTouchStart = (e) => {
+      longPressTimer = setTimeout(() => {
+        // 길게 누르기 이벤트를 처리합니다. `e.coord`는 실제 구현에 맞게 조정해야 할 수 있습니다.
+        console.log("Long press, 좌표: ", e.coord);
+        searchCoordinateToAddress(e.coord);
+      }, 800); // 800ms 이상 누르면 길게 누르기로 간주
+    };
+
+    const handleTouchEnd = () => {
+      clearTimeout(longPressTimer); // 터치가 끝나면 타이머를 취소합니다.
+    };
+
+    // 모바일 환경에서는 touchstart와 touchend 이벤트 리스너를 추가합니다.
+    naver.maps.Event.addListener(
+      mapRef.current,
+      "touchstart",
+      handleTouchStart
+    );
+    naver.maps.Event.addListener(mapRef.current, "touchend", handleTouchEnd);
 
     return () => {
       if (contextMenuWindowRef.current) {

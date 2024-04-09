@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useRef, useState } from "react";
 
+//현재 미사용중JSX
 const MapContext = createContext();
 
 export const useMap = () => useContext(MapContext);

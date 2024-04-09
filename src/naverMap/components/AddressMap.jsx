@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useState } from "react";
 import AddressInput from "./AddressInput";
 import TimeRangeInput from "./TimeRangeInput";
@@ -6,10 +5,11 @@ import DetailSettings from "./DetailSettings";
 
 import styled from "styled-components";
 
-import formatTime from "../util/Utility";
+import { makeRecommand } from "../util/Utility";
 import { useMap } from "../hooks/useMap";
 import { minCostRouteRequestApi } from "../services/CostCalApi";
 import CustomModal from "../CustomModal";
+import RouteResult from "./RouteResult";
 
 const MapPageContainer = styled.div`
   display: flex;
@@ -22,7 +22,7 @@ const MapPageContainer = styled.div`
   gap: 20px;
   z-index: 0;
 `;
-//
+
 const AddressMap = () => {
   const [address, setAddress] = useState("");
   const [startTime, setStartTime] = useState("09:00");
@@ -42,76 +42,74 @@ const AddressMap = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const naver = window.naver;
+  const contextMenuHtml = [
+    '<div style="padding:10px;min-width:100px;line-height:150%;">',
+    '   <button id="startButton" >출발</button>',
+    '   <button id="endButton" >도착</button>',
+    "</div>",
+  ].join("\n");
 
   //네이버지도 초기화, 지도 context menu추가
   const { mapRef, startMarkerRef, endMarkerRef, contextMenuWindowRef } = useMap(
-    searchCoordinateToAddress,
+    createAndShowMapContextMenu,
     startTime,
     endTime,
     settings
   );
 
-  //우클릭 메뉴만들기 - 함수 내부를 쪼개는게 좋을듯
-  function searchCoordinateToAddress(latlng) {
-    contextMenuWindowRef.current.setContent(
-      [
-        '<div style="padding:10px;min-width:100px;line-height:150%;">',
-        '   <button id="startButton" >출발</button>',
-        '   <button id="endButton" >도착</button>',
-        "</div>",
-      ].join("\n")
-    );
+  //지도 우클릭 메뉴 만들기/보여주기
+  function createAndShowMapContextMenu(latlng) {
+    //메뉴를 보여주기
+    contextMenuWindowRef.current.setContent(contextMenuHtml);
     contextMenuWindowRef.current.open(mapRef.current, latlng);
 
-    //버튼에 이벤트 리스너를 등록합니다.
+    //메뉴의 버튼 만들기
     const startButton = document.getElementById("startButton");
     const endButton = document.getElementById("endButton");
-
     if (startButton) {
-      startButton.addEventListener("click", () => {
-        contextMenuWindowRef.current.close();
-
-        if (startMarkerRef.current != null) {
-          startMarkerRef.current.setMap(null);
-        }
-
-        const marker = new naver.maps.Marker({
-          position: latlng,
-          map: mapRef.current,
-          icon: "./출발test.png",
-        });
-
-        startMarkerRef.current = marker;
-        console.log("marker: ", marker);
-
-        //서버에요청
-        requestMinCostRoute();
-      });
+      startButton.addEventListener("click", () =>
+        addMarkerAndRequestRoute(startMarkerRef, "./출발test.png", latlng)
+      );
     }
-
     if (endButton) {
-      endButton.addEventListener("click", () => {
-        contextMenuWindowRef.current.close();
-
-        if (endMarkerRef.current != null) {
-          endMarkerRef.current.setMap(null);
-        }
-
-        const marker = new naver.maps.Marker({
-          position: latlng,
-          map: mapRef.current,
-          icon: "./도착test.png",
-        });
-
-        endMarkerRef.current = marker;
-
-        //서버에요청
-        requestMinCostRoute();
-      });
+      endButton.addEventListener("click", () =>
+        addMarkerAndRequestRoute(endMarkerRef, "./도착test.png", latlng)
+      );
     }
   }
 
-  //주소로 좌표찾고 이동 후 버튼표시
+  // 마커를 추가하고 서버에 최소 경로를 요청하는 함수
+  async function addMarkerAndRequestRoute(markerRef, iconPath, latlng) {
+    contextMenuWindowRef.current.close();
+
+    if (markerRef.current != null) {
+      markerRef.current.setMap(null);
+    }
+
+    const marker = new naver.maps.Marker({
+      position: latlng,
+      map: mapRef.current,
+      icon: iconPath,
+    });
+
+    markerRef.current = marker;
+
+    //출도착지 모두 지정된 경우
+    if (startMarkerRef.current != null && endMarkerRef.current != null) {
+      //서버에요청
+      setIsLoading(true);
+      setShowResult(true);
+      const response = await requestMinCostRoute();
+      //형태변환
+      const makedData = makeRecommand(response);
+      //결과출력
+      setRecommand(makedData);
+
+      setIsLoading(false);
+    }
+  }
+
+  //주소로 좌표찾고 이동 후 메뉴표시
   function searchAddressToCoordinate(address) {
     const naver = window.naver;
 
@@ -137,7 +135,7 @@ const AddressMap = () => {
         console.log("searchAddressToCoordinate, point: ", point);
 
         mapRef.current.setCenter(point);
-        searchCoordinateToAddress(point);
+        createAndShowMapContextMenu(point);
       }
     );
   }
@@ -153,9 +151,7 @@ const AddressMap = () => {
       return;
     }
 
-    //로직시작s
-    setShowResult(true);
-    setIsLoading(true);
+    //로직시작
 
     const response = await minCostRouteRequestApi(
       startMarkerRef.current.getPosition().lng(),
@@ -172,75 +168,8 @@ const AddressMap = () => {
 
     console.log(response); // 데이터 처리
     setCostServerData(response);
-    makeRecommand(response);
 
-    setIsLoading(false);
-
-    /*
-    const apiUrl = process.env.REACT_APP_API_ENDPOINT;
-
-    axios
-      .get(
-        `${apiUrl}/a?` +
-          `startX=${startMarkerRef.current.getPosition().lng()}&` +
-          `startY=${startMarkerRef.current.getPosition().lat()}&` +
-          `goalX=${endMarkerRef.current.getPosition().lng()}&` +
-          `goalY=${endMarkerRef.current.getPosition().lat()}&` +
-          `startTime=2024-02-05T${startTime}&` +
-          `endTime=2024-02-05T${endTime}&` +
-          `opportunityCost=${settings.opportunityCost}&` +
-          `subwayCost=${settings.subwayCost}&` +
-          `busCost=${settings.busCost}&` +
-          `walkingCost=${settings.walkingCost}`
-      )
-      .then((response) => {
-        setCostServerData(response.data);
-        makeRecommand(response.data);
-        console.log(response.data); // 데이터 처리
-
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert(
-          "서버 요청에 실패했습니다. 새로고침 후 다시 시도해주세요. Error:" +
-            error.message
-        ); // 오류 처리
-      });
-      */
-  };
-
-  const makeRecommand = (data) => {
-    var path = data.pathAndCosts[data.minCostIndex].path;
-
-    // 출발 시간 변환
-    const formattedDepartureTime = formatTime(path.departureTime);
-    const formattedArrivalTime = formatTime(path.arrivalTime);
-
-    var makedData = `추천시간
-      출발시간: ${formattedDepartureTime}
-      도착시간: ${formattedArrivalTime}
-      요약: `;
-
-    //경로
-    path.legs[0].steps.forEach((step) => {
-      if (step.type === "WALKING") {
-        //var ways = step.walkpath.summary.ways;
-        //makedData += ways[ways.length - 1];
-        makedData += `- 걷기(${step.duration}분)`;
-      } else {
-        var stations = step.stations;
-        makedData += ` - ${step.routes[0].name} ${step.type}(${
-          step.duration
-        }분, ${stations[0].name} ~ ${stations[stations.length - 1].name})`;
-
-        // makedData += ` - ${stations[0].name}에서 탑승 ${
-        //   stations[stations.length - 1].name
-        // }에서 하차/`;
-      }
-    });
-
-    setRecommand(makedData);
+    return response;
   };
 
   return (
@@ -269,18 +198,13 @@ const AddressMap = () => {
           setSettings={setSettings}
         />
 
-        {showResult &&
-          (isLoading ? (
-            <h2> 계산중..... </h2>
-          ) : (
-            <div>
-              <h2>추천 시간 출력</h2>
-              <pre style={{ fontSize: "20px" }}>{recommand}</pre>
-
-              <h1>서버로부터 받은 데이터</h1>
-              <pre>{JSON.stringify(costServerData, null, 2)}</pre>
-            </div>
-          ))}
+        {showResult && (
+          <RouteResult
+            isLoading={isLoading}
+            recommand={recommand}
+            costServerData={costServerData}
+          />
+        )}
       </MapPageContainer>
     </div>
   );

@@ -7,6 +7,7 @@ const TimeRangeContainer = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 0px;
+  margin-top: 20px;
   /* padding: 10px;
   position: relative;
   top: 710px;

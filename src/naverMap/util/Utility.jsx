@@ -2,8 +2,8 @@ function formatTime(isoString) {
   const date = new Date(isoString);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
-  const seconds = date.getSeconds().toString().padStart(2, "0");
-  return `${hours}시 ${minutes}분 ${seconds}초`;
+  //const seconds = date.getSeconds().toString().padStart(2, "0");
+  return `${hours}시 ${minutes}분`;
 }
 
 export const makeRecommand = (data) => {
@@ -13,10 +13,9 @@ export const makeRecommand = (data) => {
   const formattedDepartureTime = formatTime(path.departureTime);
   const formattedArrivalTime = formatTime(path.arrivalTime);
 
-  var makedData = `추천시간
-    출발시간: ${formattedDepartureTime}
-    도착시간: ${formattedArrivalTime}
-    요약: `;
+  var makedData = `    ${formattedDepartureTime} 출근
+    ${formattedArrivalTime} 도착
+    경로: `;
 
   //경로
   path.legs[0].steps.forEach((step) => {

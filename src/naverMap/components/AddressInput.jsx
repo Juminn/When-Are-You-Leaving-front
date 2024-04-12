@@ -3,10 +3,12 @@ import React from "react";
 import styled from "styled-components";
 
 const InputContainer = styled.div`
-  position: absolute;
-  top: 10px;
+  /* position: absolute;
+  
   left: 10px;
-  z-index: 0;
+  z-index: 0; */
+  margin-bottom: 20px;
+  margin-top: 20px;
 `;
 
 const AddressInputField = styled.input`

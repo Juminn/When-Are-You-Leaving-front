@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import AddressInput from "./AddressInput";
 import TimeRangeInput from "./TimeRangeInput";
 import DetailSettings from "./DetailSettings";
@@ -10,17 +10,48 @@ import { useMap } from "../hooks/useMap";
 import { minCostRouteRequestApi } from "../services/CostCalApi";
 import CustomModal from "../CustomModal";
 import RouteResult from "./RouteResult";
+import LeftPannelToggleButton from "./LeftPannelToggleButton";
 
-const MapPageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+// const MapPageContainer = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   align-items: flex-start;
 
+//   position: relative;
+//   top: 10px;
+//   left: 10px;
+//   gap: 20px;
+//   z-index: 0;
+// `;
+
+const PageLayout = styled.div`
   position: relative;
-  top: 10px;
-  left: 10px;
-  gap: 20px;
-  z-index: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+`;
+
+const LeftPanel = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  //min-width: ${({ isOpen }) => (isOpen ? "30vw" : "0")};
+  width: ${({ isOpen }) => (isOpen ? "auto" : "0")};
+  background: white; // 배경색 추가
+  overflow-x: scroll; // 내용이 넘칠 경우 스크롤
+  transition: width 0.3s ease-out;
+  z-index: 5; // 지도 위에 오도록 z-index 설정
+
+  padding-left: ${({ isOpen }) => (isOpen ? "1vw" : "0")}; // 왼쪽 여백 추가
+  padding-right: ${({ isOpen }) => (isOpen ? "1vw" : "0")}; // 왼쪽 여백 추가
+
+  border-right: 2px solid #ccc; /* 오른쪽 경계선 추가 */
+`;
+
+const MapContainer = styled.div`
+  width: 100%;
+  height: 100%;
 `;
 
 const AddressMap = () => {
@@ -40,6 +71,16 @@ const AddressMap = () => {
 
   const [showResult, setShowResult] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isPanelOpen, setIsPanelOpen] = useState(true); // 패널 상태 관리를 위한 상태
+
+  // 레프트 패널의 Ref를 생성합니다.
+  const leftPanelRef = useRef();
+
+  // 패널 토글 함수
+  const togglePanel = () => {
+    setIsPanelOpen(!isPanelOpen);
+  };
 
   const naver = window.naver;
   const contextMenuHtml = [
@@ -173,16 +214,15 @@ const AddressMap = () => {
   };
 
   return (
-    <div>
-      <div id="map" style={{ width: "100%", height: "80vh" }}></div>
-      <AddressInput
-        address={address}
-        setAddress={setAddress}
-        onSearch={searchAddressToCoordinate}
-      />
+    <PageLayout>
+      <LeftPanel isOpen={isPanelOpen} ref={leftPanelRef}>
+        <AddressInput
+          address={address}
+          setAddress={setAddress}
+          onSearch={searchAddressToCoordinate}
+        />
 
-      <CustomModal />
-      <MapPageContainer>
+        <CustomModal />
         <TimeRangeInput
           startTime={startTime}
           setStartTime={setStartTime}
@@ -205,8 +245,18 @@ const AddressMap = () => {
             costServerData={costServerData}
           />
         )}
-      </MapPageContainer>
-    </div>
+      </LeftPanel>
+
+      <MapContainer>
+        <div id="map" style={{ width: "100%", height: "100vh" }}></div>
+      </MapContainer>
+
+      <LeftPannelToggleButton
+        panelRef={leftPanelRef}
+        isOpen={isPanelOpen}
+        onClick={togglePanel}
+      />
+    </PageLayout>
   );
 };
 

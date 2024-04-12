@@ -36,3 +36,13 @@
     transform: rotate(360deg);
   }
 }
+
+body {
+  font-family: "Apple SD Gothic Neo", "Apple SD Gothic", notosanskr,
+    "Malgun Gothic", "맑은 고딕", Dotum, 돋움, sans-serif;
+}
+
+pre {
+  font-family: "Apple SD Gothic Neo", "Apple SD Gothic", notosanskr,
+    "Malgun Gothic", "맑은 고딕", Dotum, 돋움, sans-serif;
+}

@@ -5,12 +5,16 @@ import DetailSettings from "./DetailSettings";
 
 import styled from "styled-components";
 
-import { makeRecommand } from "../util/Utility";
+import {
+  makeRecommand,
+  transformData as transformMinCostRoute,
+} from "../util/Utility";
 import { useMap } from "../hooks/useMap";
 import { minCostRouteRequestApi } from "../services/CostCalApi";
-import CustomModal from "../CustomModal";
+import CustomModal from "./GuideModal";
 import RouteResult from "./RouteResult";
 import LeftPannelToggleButton from "./LeftPannelToggleButton";
+import RouteTimeline from "./RouteTimeline";
 
 // const MapPageContainer = styled.div`
 //   display: flex;
@@ -59,7 +63,7 @@ const AddressMap = () => {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("09:30");
   const [costServerData, setCostServerData] = useState("");
-  const [recommand, setRecommand] = useState("");
+  const [minCostRoute, setMinCostRoute] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
 
   const [settings, setSettings] = useState({
@@ -141,10 +145,17 @@ const AddressMap = () => {
       setIsLoading(true);
       setShowResult(true);
       const response = await requestMinCostRoute();
+
+      if (response === null) {
+        return;
+      }
       //형태변환
-      const makedData = makeRecommand(response);
+      //const makedData = makeRecommand(response);
+      const transFormedMinCostRoute = transformMinCostRoute(response);
       //결과출력
-      setRecommand(makedData);
+      //setRecommand(makedData);
+      setMinCostRoute(transFormedMinCostRoute);
+      //setCostServerData(transFormedMinCostRoute);
 
       setIsLoading(false);
     }
@@ -238,10 +249,12 @@ const AddressMap = () => {
           setSettings={setSettings}
         />
 
+        <RouteTimeline minCostRoute={minCostRoute} />
+
         {showResult && (
           <RouteResult
             isLoading={isLoading}
-            recommand={recommand}
+            recommand={minCostRoute}
             costServerData={costServerData}
           />
         )}

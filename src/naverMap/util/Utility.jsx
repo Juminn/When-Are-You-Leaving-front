@@ -3,7 +3,7 @@ function formatTime(isoString) {
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   //const seconds = date.getSeconds().toString().padStart(2, "0");
-  return `${hours}시 ${minutes}분`;
+  return `${hours}:${minutes}`;
 }
 
 export const makeRecommand = (data) => {
@@ -31,5 +31,50 @@ export const makeRecommand = (data) => {
 
   return makedData;
 };
+
+// 결과 데이터를 가공하는 함수
+export function transformData(data) {
+  const { minCostIndex, pathAndCosts } = data;
+  const selectedPath = pathAndCosts[minCostIndex].path;
+  const steps = selectedPath.legs[0].steps;
+  const departureTime = formatTime(selectedPath.departureTime);
+  const arrivalTime = formatTime(selectedPath.arrivalTime);
+
+  const transformedSteps = steps.map((step, index) => {
+    const { type, duration, stations, routes } = step;
+    const transport = type;
+
+    let start, end, method, info;
+
+    
+
+    if (type === "WALKING") {
+      //const ways = step.walkpath.summary.ways;
+      //start = ways[0].name;
+      //end = ways[ways.length - 1].name;
+    } else if (type === "BUS") {
+      method = routes[0].name;
+      start = stations[0].name + " 승차";
+      end = stations[stations.length - 1].name + " 하차";
+      info = method;
+    } else if (type === "SUBWAY") {
+      method = routes[0].name;
+      start = method + " " + stations[0].name + "역 승차";
+      end = method + " " + stations[stations.length - 1].name + "역 하차";
+    }
+
+    if (index === 0) {
+      start = departureTime + "출발";
+    }
+
+    if (index === steps.length - 1) {
+      end = arrivalTime + "도착";
+    }
+
+    return { transport, duration, start, end, info };
+  });
+
+  return transformedSteps;
+}
 
 export default formatTime;

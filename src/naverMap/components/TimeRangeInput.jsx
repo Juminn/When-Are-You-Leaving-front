@@ -42,17 +42,14 @@ const TimeRangeInput = ({
   return (
     <TimeRangeContainer>
       <SettingField>
-        <Label>시작 시간</Label>
+        <Label>출발 가능한 시간 범위</Label>
         <TimeInput
           id="startTime"
           type="time"
           value={startTime}
           onChange={(e) => setStartTime(e.target.value)}
         />
-      </SettingField>
-
-      <SettingField>
-        <Label>종료 시간:</Label>
+        ~
         <TimeInput
           id="endTime"
           type="time"

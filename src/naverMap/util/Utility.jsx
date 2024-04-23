@@ -46,8 +46,6 @@ export function transformData(data) {
 
     let start, end, method, info;
 
-    
-
     if (type === "WALKING") {
       //const ways = step.walkpath.summary.ways;
       //start = ways[0].name;
@@ -61,6 +59,10 @@ export function transformData(data) {
       method = routes[0].name;
       start = method + " " + stations[0].name + "역 승차";
       end = method + " " + stations[stations.length - 1].name + "역 하차";
+    } else {
+      method = routes[0].name;
+      start = method + " " + stations[0].name + " 승차";
+      end = method + " " + stations[stations.length - 1].name + " 하차";
     }
 
     if (index === 0) {

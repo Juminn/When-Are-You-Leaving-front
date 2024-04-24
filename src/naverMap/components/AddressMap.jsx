@@ -42,6 +42,7 @@ const LeftPanel = styled.div`
   height: 100%;
   //min-width: ${({ isOpen }) => (isOpen ? "30vw" : "0")};
   width: ${({ isOpen }) => (isOpen ? "auto" : "0")};
+  max-width: 50vw;
   background: white; // 배경색 추가
   overflow-x: scroll; // 내용이 넘칠 경우 스크롤
   transition: width 0.3s ease-out;

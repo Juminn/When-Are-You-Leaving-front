@@ -85,6 +85,7 @@ function CustomModal() {
         contentLabel="사용법 모달"
       >
         <h4>"몇시에 나갈까?"</h4>
+        <h5>최적의 사용을 위해 PC환경 접속을 권장드립니다.</h5>
         <pre>{introduce}</pre>
 
         <h4>"어떻게 이용하나요?"</h4>

@@ -250,12 +250,10 @@ const AddressMap = () => {
           setSettings={setSettings}
         />
 
-        <RouteTimeline minCostRoute={minCostRoute} />
-
         {showResult && (
           <RouteResult
             isLoading={isLoading}
-            recommand={minCostRoute}
+            minCostRoute={minCostRoute}
             costServerData={costServerData}
           />
         )}

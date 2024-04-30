@@ -73,7 +73,7 @@ export const useMap = (
         // 길게 누르기 이벤트를 처리합니다. `e.coord`는 실제 구현에 맞게 조정해야 할 수 있습니다.
         console.log("Long press, 좌표: ", e.coord);
         createAndShowMapContextMenu(e.coord);
-      }, 600); // 800ms 이상 누르면 길게 누르기로 간주
+      }, 500); // 800ms 이상 누르면 길게 누르기로 간주
     };
 
     const handleTouchEnd = () => {

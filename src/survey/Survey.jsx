@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
+import { getNextQuestion } from "./SurveyApi";
 
 const questions = [
   { title: "Question 1", options: ["Option 1A", "Option 1B"] },
@@ -102,6 +103,20 @@ const Survey = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [animate, setAnimate] = useState(false);
 
+  const [questionData, setQuestionData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    getNextQuestion()
+      .then(response => {
+        setQuestionData(response);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
   const handleOptionClick = (index) => {
     setSelectedOption(index);
     setAnimate(true);
@@ -135,6 +150,8 @@ const Survey = () => {
         ))}
         <VS>VS</VS>
       </Options>
+      <h4>서버로부터 받은 데이터</h4>
+      <pre>{JSON.stringify(questionData, null, 2)}</pre>
     </Container>
   );
 };

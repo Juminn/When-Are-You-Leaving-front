@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import { getNextQuestion } from "./SurveyApi";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const questions = [
   { title: "Question 1", options: ["Option 1A", "Option 1B"] },
@@ -67,13 +68,13 @@ const stayRight = keyframes`
 
 // 로직을 별도의 함수로 분리
 const selectAnimation = (props) => {
-  if (!props.animate) {
+  if (!props.$animate) {
     return css`none`;
   }
-  if (props.isSelected) {
-    return props.index === 0 ? stayLeft : stayRight;
+  if (props.$isSelected) {
+    return props.$index === 0 ? stayLeft : stayRight;
   }
-  return props.index === 0 ? fadeOutLeft : fadeOutRight;
+  return props.$index === 0 ? fadeOutLeft : fadeOutRight;
 };
 
 const Option = styled.div`
@@ -99,6 +100,7 @@ const VS = styled.div`
 `;
 
 const Survey = () => {
+  const navigate = useNavigate();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [animate, setAnimate] = useState(false);
@@ -107,25 +109,52 @@ const Survey = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const result = useRef([]);
+
   useEffect(() => {
+    console.log("useeffct");
     getNextQuestion()
-      .then(response => {
-        setQuestionData(response);
+      .then((response) => {
+        setQuestionData(response.data);
       })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+      .catch((error) => {
+        console.error("Error fetching data:", error);
       });
   }, []);
 
   const handleOptionClick = (index) => {
-    setSelectedOption(index);
+    console.log("handleoptionClick");
+    const selectedOption2 = index;
+
+    //결과저장
+    if (selectedOption2 == 1) {
+      result.current[questionData.questionIndex] =
+        questionData.options[selectedOption2].duration;
+    }
+
+    console.log(result.current);
+
+    setSelectedOption(() => index);
     setAnimate(true);
     setTimeout(() => {
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-      } else {
-        alert("You have completed the questions!");
-      }
+      getNextQuestion(
+        questionData.questionIndex,
+        questionData.followUpQuestionIndex,
+        selectedOption2,
+        questionData.options
+      )
+        .then((response) => {
+          if (response.data.isLastQuestion) {
+            //alert("You have completed the questions!");
+            navigate("/results", { state: { result: result } });
+          } else {
+            setQuestionData(response.data);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+
       setSelectedOption(null);
       setAnimate(false);
     }, 500);
@@ -133,21 +162,23 @@ const Survey = () => {
 
   return (
     <Container>
-      <Header>{questions[currentQuestion].title}</Header>
+      <Header>대중교통 MBTI</Header>
       <Options>
-        {questions[currentQuestion].options.map((option, index) => (
-          <Option
-            key={index}
-            color={index === 0 ? "lightblue" : "lightgreen"}
-            onClick={() => handleOptionClick(index)}
-            isSelected={selectedOption === index}
-            animate={animate}
-            index={index}
-            selectedOption={selectedOption}
-          >
-            {option}
-          </Option>
-        ))}
+        {questionData &&
+          questionData.options &&
+          questionData.options.map((option, index) => (
+            <Option
+              key={index}
+              color={index === 0 ? "lightblue" : "lightgreen"}
+              onClick={() => handleOptionClick(index)}
+              $isSelected={selectedOption === index}
+              $animate={animate}
+              $index={index}
+              $selectedOption={selectedOption}
+            >
+              {option.transport}: {option.duration} 분
+            </Option>
+          ))}
         <VS>VS</VS>
       </Options>
       <h4>서버로부터 받은 데이터</h4>

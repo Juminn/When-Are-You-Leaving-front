@@ -176,7 +176,8 @@ const Survey = () => {
               $index={index}
               $selectedOption={selectedOption}
             >
-              {option.transport}: {option.duration} 분
+              {option.transport}: {option.duration}{" "}
+              {option.transport === "Transfer" ? "번" : "분"}
             </Option>
           ))}
         <VS>VS</VS>

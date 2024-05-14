@@ -29,10 +29,10 @@ const Input = styled.input`
 `;
 
 const labelMap = {
-  opportunityCost: "시간당 기회 비용(시급)",
   subwayCost: "시간당 지하철 비용",
   busCost: "시간당 버스 비용",
   walkingCost: "시간당 걷기 비용",
+  transferCost: "환승 1회 비용",
 };
 
 const SettingField = ({ label, name, value, onChange }) => (

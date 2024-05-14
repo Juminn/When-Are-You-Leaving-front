@@ -57,7 +57,7 @@ const TimeRangeInput = ({
           onChange={(e) => setEndTime(e.target.value)}
         />
       </SettingField>
-      <button onClick={() => setShowDetails(!showDetails)}>상세 설정</button>
+      {/* <button onClick={() => setShowDetails(!showDetails)}>상세 설정</button> */}
     </TimeRangeContainer>
   );
 };

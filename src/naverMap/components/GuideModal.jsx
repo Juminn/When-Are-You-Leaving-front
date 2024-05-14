@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
+import styled from "styled-components";
 
 // 모달의 스타일을 지정할 수 있습니다.
 const customStyles = {
@@ -22,7 +23,23 @@ const customStyles = {
 // 모달을 앱의 루트 엘리먼트에 바인딩합니다(선택적).
 Modal.setAppElement("#root");
 
-function CustomModal() {
+const Button = styled.button`
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  //margin-left: auto; // 오른쪽 정렬을 위해
+  display: block;
+
+  margin-right: 10px; // 모든 버튼에 오른쪽 마진 추가
+  &:last-child {
+    margin-right: 0; // 마지막 버튼의 오른쪽 마진 제거
+  }
+`;
+
+function GuideModal() {
   const [modalIsOpen, setIsOpen] = useState(false);
 
   function openModal() {
@@ -77,7 +94,7 @@ function CustomModal() {
 
   return (
     <div>
-      <button onClick={openModal}>사용법</button>
+      <Button onClick={openModal}>사용법</Button>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
@@ -110,4 +127,4 @@ function CustomModal() {
   );
 }
 
-export default CustomModal;
+export default GuideModal;

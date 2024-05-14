@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AddressInput from "./AddressInput";
 import TimeRangeInput from "./TimeRangeInput";
 import DetailSettings from "./DetailSettings";
@@ -11,10 +11,12 @@ import {
 } from "../util/Utility";
 import { useMap } from "../hooks/useMap";
 import { minCostRouteRequestApi } from "../services/CostCalApi";
-import CustomModal from "./GuideModal";
+import GuideModal from "./GuideModal";
 import RouteResult from "./RouteResult";
 import LeftPannelToggleButton from "./LeftPannelToggleButton";
 import RouteTimeline from "./RouteTimeline";
+import { useLocation } from "react-router-dom";
+import SettingButtons from "./SettingButtons";
 
 // const MapPageContainer = styled.div`
 //   display: flex;
@@ -60,6 +62,7 @@ const MapContainer = styled.div`
 `;
 
 const AddressMap = () => {
+  const location = useLocation();
   const [address, setAddress] = useState("");
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("09:30");
@@ -68,10 +71,10 @@ const AddressMap = () => {
   const [showDetails, setShowDetails] = useState(false);
 
   const [settings, setSettings] = useState({
-    opportunityCost: "14000",
-    subwayCost: "10000",
-    busCost: "14000",
     walkingCost: "20000",
+    busCost: "14000",
+    subwayCost: "10000",
+    transferCost: "4000",
   });
 
   const [showResult, setShowResult] = useState(false);
@@ -81,6 +84,13 @@ const AddressMap = () => {
 
   // 레프트 패널의 Ref를 생성합니다.
   const leftPanelRef = useRef();
+
+  // 새로운 설정값을 받으면 상태를 업데이트합니다.
+  useEffect(() => {
+    if (location.state?.settings) {
+      setSettings(location.state.settings);
+    }
+  }, [location.state]);
 
   // 패널 토글 함수
   const togglePanel = () => {
@@ -114,12 +124,12 @@ const AddressMap = () => {
     const endButton = document.getElementById("endButton");
     if (startButton) {
       startButton.addEventListener("click", () =>
-        addMarkerAndRequestRoute(startMarkerRef, "./출발test.png", latlng)
+        addMarkerAndRequestRoute(startMarkerRef, "./출발.png", latlng)
       );
     }
     if (endButton) {
       endButton.addEventListener("click", () =>
-        addMarkerAndRequestRoute(endMarkerRef, "./도착test.png", latlng)
+        addMarkerAndRequestRoute(endMarkerRef, "./도착.png", latlng)
       );
     }
   }
@@ -213,7 +223,7 @@ const AddressMap = () => {
       endMarkerRef.current.getPosition().lat(),
       "2024-02-05T" + startTime,
       "2024-02-05T" + endTime,
-      settings.opportunityCost,
+      settings.transferCost,
       settings.subwayCost,
       settings.busCost,
       settings.walkingCost
@@ -234,12 +244,17 @@ const AddressMap = () => {
           onSearch={searchAddressToCoordinate}
         />
 
-        <CustomModal />
+        <GuideModal />
         <TimeRangeInput
           startTime={startTime}
           setStartTime={setStartTime}
           endTime={endTime}
           setEndTime={setEndTime}
+          showDetails={showDetails}
+          setShowDetails={setShowDetails}
+        />
+
+        <SettingButtons
           showDetails={showDetails}
           setShowDetails={setShowDetails}
         />

@@ -7,7 +7,7 @@ export const minCostRouteRequestApi = async (
   goalY,
   startTime,
   endTime,
-  opportunityCost,
+  transferCost,
   subwayCost,
   busCost,
   walkingCost
@@ -23,7 +23,7 @@ export const minCostRouteRequestApi = async (
         `goalY=${goalY}&` +
         `startTime=${startTime}&` +
         `endTime=${endTime}&` +
-        `opportunityCost=${opportunityCost}&` +
+        `transferCost=${transferCost}&` +
         `subwayCost=${subwayCost}&` +
         `busCost=${busCost}&` +
         `walkingCost=${walkingCost}`

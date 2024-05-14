@@ -16,4 +16,12 @@ const getNextQuestion = (
   });
 };
 
-export { getNextQuestion };
+const getSurveyResult = (result) => {
+  return axios.post(`${apiUrl}/survey/result`, {
+    bus: result.Bus,
+    subway: result.Subway,
+    transfer: result.Transfer,
+  });
+};
+
+export { getNextQuestion, getSurveyResult };

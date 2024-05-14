@@ -109,7 +109,7 @@ const Survey = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const result = useRef([]);
+  const result = useRef({});
 
   useEffect(() => {
     console.log("useeffct");
@@ -126,10 +126,12 @@ const Survey = () => {
     console.log("handleoptionClick");
     const selectedOption2 = index;
 
+    const transportKey = questionData.options[selectedOption2].transport;
+    const durationValue = questionData.options[selectedOption2].duration;
+
     //결과저장
     if (selectedOption2 == 1) {
-      result.current[questionData.questionIndex] =
-        questionData.options[selectedOption2].duration;
+      result.current[transportKey] = durationValue;
     }
 
     console.log(result.current);
@@ -146,7 +148,7 @@ const Survey = () => {
         .then((response) => {
           if (response.data.isLastQuestion) {
             //alert("You have completed the questions!");
-            navigate("/results", { state: { result: result } });
+            navigate("/Survey/result", { state: { result: result.current } });
           } else {
             setQuestionData(response.data);
           }

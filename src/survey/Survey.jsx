@@ -126,14 +126,10 @@ const Survey = () => {
     console.log("handleoptionClick");
     const selectedOption2 = index;
 
-    const transportKey = questionData.options[selectedOption2].transport;
-    const durationValue = questionData.options[selectedOption2].duration;
-
     //결과저장
-    if (selectedOption2 == 1) {
-      result.current[transportKey] = durationValue;
-    }
-
+    const transportKey = questionData.options[1].transport;
+    const durationValue = questionData.options[1].duration;
+    result.current[transportKey] = durationValue;
     console.log(result.current);
 
     setSelectedOption(() => index);

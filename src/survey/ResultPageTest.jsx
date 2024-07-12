@@ -1,7 +1,9 @@
 // src/ProfileCard.js
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { getSurveyResult } from "./SurveyApi";
 //import profileImage from "../../public/BUS.png"; // Make sure to import the image
 
 const ResultPageTestContainer = styled.div`
@@ -50,6 +52,24 @@ const NextButton = styled.button`
 `;
 
 const ResultPageTest = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const result = location.state?.result;
+  const [serverResult, setServerResult] = useState(null);
+
+  //서버에 결과데이터요청
+  useEffect(() => {
+    console.log("ResultPage useeffct");
+    console.log(result);
+    getSurveyResult(result)
+      .then((response) => {
+        setServerResult(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+
   return (
     <ResultPageTestContainer>
       <ProfileHeader>

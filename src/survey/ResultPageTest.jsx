@@ -63,6 +63,7 @@ const ResultPageTest = () => {
     console.log(result);
     getSurveyResult(result)
       .then((response) => {
+        console.log("serverResult: ", serverResult);
         setServerResult(response.data);
       })
       .catch((error) => {
@@ -70,24 +71,32 @@ const ResultPageTest = () => {
       });
   }, []);
 
+  // 버튼 클릭 핸들러
+  const handleGoToAddressMap = () => {
+    const { mbti, mbtiDescription, ...settings } = serverResult; // mbti 속성을 제외한 나머지를 settings 객체로 추출
+    navigate("/", { state: { settings: settings } });
+  };
+
   return (
-    <ResultPageTestContainer>
-      <ProfileHeader>
-        <h2>성격 유형:</h2>
-        <h1>장인</h1>
-        <h2>ISTP-A</h2>
-      </ProfileHeader>
-      <ProfileImage>
-        <img src={"./SUBWAY.png"} alt="Profile" />
-      </ProfileImage>
-      <ProfileDescription>
-        <p>
-          장인은 대담하면서도 현실적인 성격으로, 모든 종류의 도구를 자유자재로
-          다루는 성격 유형입니다.
-        </p>
-      </ProfileDescription>
-      <NextButton>다음</NextButton>
-    </ResultPageTestContainer>
+    <div>
+      {serverResult && (
+        <ResultPageTestContainer>
+          <ProfileHeader>
+            <h2>대중교통MBTI:</h2>
+            <h1>{serverResult.mbti}</h1>
+          </ProfileHeader>
+          <ProfileImage>
+            <img src={"./" + serverResult.mbti + ".png"} alt="Profile" />
+          </ProfileImage>
+          <ProfileDescription>
+            <p>{serverResult.mbtiDescription}</p>
+          </ProfileDescription>
+          <NextButton onClick={handleGoToAddressMap}>
+            설문 결과를 바탕으로 출근 시간 추천받기
+          </NextButton>
+        </ResultPageTestContainer>
+      )}
+    </div>
   );
 };
 

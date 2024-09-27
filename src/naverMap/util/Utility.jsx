@@ -79,4 +79,16 @@ export function transformData(data) {
   return transformedSteps;
 }
 
+export const timeDifference = (startTime, endTime) => {
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+
+  const startTotalMinutes = startHour * 60 + startMinute;
+  const endTotalMinutes = endHour * 60 + endMinute;
+
+  const diffInMinutes = endTotalMinutes - startTotalMinutes;
+
+  return diffInMinutes;
+};
+
 export default formatTime;

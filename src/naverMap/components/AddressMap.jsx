@@ -8,6 +8,7 @@ import styled from "styled-components";
 import {
   makeRecommand,
   transformData as transformMinCostRoute,
+  timeDifference,
 } from "../util/Utility";
 import { useMap } from "../hooks/useMap";
 import { minCostRouteRequestApi } from "../services/CostCalApi";
@@ -157,7 +158,9 @@ const AddressMap = () => {
       setShowResult(true);
       const response = await requestMinCostRoute();
 
-      if (response === null) {
+      if (response == null || response === null) {
+        setIsLoading(false);
+        setShowResult(false);
         return;
       }
       //형태변환
@@ -211,6 +214,11 @@ const AddressMap = () => {
     }
     if (startTime > endTime) {
       alert("종료시간이 시작시간보다 빠를 수 없습니다. ");
+      return;
+    }
+
+    if (timeDifference(startTime, endTime) > 540) {
+      alert("시간 범위를 9시간 이하로 맞춰주세요.");
       return;
     }
 

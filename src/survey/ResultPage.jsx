@@ -22,6 +22,7 @@ const ResultsPage = () => {
   const result = location.state?.result;
   const [serverResult, setServerResult] = useState(null);
 
+  //서버에 결과데이터요청
   useEffect(() => {
     console.log("ResultPage useeffct");
     console.log(result);

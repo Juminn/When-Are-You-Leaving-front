@@ -46,8 +46,10 @@ export const minCostRouteRequestApi = async (
         console.error("Server response error:", error.response.data);
         // 에러 메시지를 알림으로 보여주기
         alert(
-          `서버 요청에 실패했습니다. Error: ${
-            error.response.data.message || "An unknown error occurred."
+          `서버 요청에 실패했습니다. ${
+            error.response.data.message ||
+            error.response.data ||
+            "An unknown error occurred."
           }`
         );
       } else if (error.request) {
